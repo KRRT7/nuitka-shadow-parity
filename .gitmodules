@@ -1,0 +1,7 @@
+[submodule "Nuitka"]
+	path = Nuitka
+	url = https://github.com/KRRT7/Nuitka
+	branch = shadow-develop
+[submodule "Nuitka-CPython-tests"]
+	path = Nuitka-CPython-tests
+	url = https://github.com/Nuitka/Nuitka-CPython-tests

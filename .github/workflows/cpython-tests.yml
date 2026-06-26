@@ -1,0 +1,64 @@
+name: CPython tests with Nuitka
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Nuitka test search mode"
+        required: true
+        default: "only"
+        type: choice
+        options:
+          - only
+          - search
+          - all
+      pattern:
+        description: "Test pattern, e.g. test_dict.py"
+        required: false
+        default: "test_list.py"
+
+jobs:
+  cpython310:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Keep Node available for act post steps
+        if: ${{ env.ACT == 'true' }}
+        run: |
+          node_path="$(command -v node || find / -type f -name node -perm -111 2>/dev/null | head -n 1)"
+          if [ -n "$node_path" ]; then
+            ln -sf "$node_path" "${pythonLocation}/bin/node"
+            ln -sf "$node_path" /usr/bin/node
+          fi
+
+      - name: Install system tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential ccache
+
+      - name: Show revisions
+        env:
+          PYTHONPATH: ${{ github.workspace }}/Nuitka
+          NUITKA_TEST_INSTALLED: "1"
+        run: |
+          git submodule status
+          python --version
+          python -m nuitka --version
+
+      - name: Run CPython test subset
+        working-directory: Nuitka-CPython-tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}/Nuitka
+          NUITKA_TEST_INSTALLED: "1"
+          CCACHE_DIR: ${{ github.workspace }}/.ccache
+        run: |
+          python run_all.py "${{ inputs.mode }}" "${{ inputs.pattern }}"
