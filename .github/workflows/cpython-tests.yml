@@ -16,11 +16,28 @@ on:
         description: "Test pattern, e.g. test_dict.py"
         required: false
         default: "test_list.py"
+      python-version:
+        description: "CPython version to run, or all supported versions"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - "all"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
 
 jobs:
-  cpython310:
+  cpython:
+    name: CPython ${{ matrix.python-version }}
     runs-on: ubuntu-24.04
     timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ${{ fromJSON(inputs.python-version == 'all' && '["3.8","3.9","3.10","3.11","3.12"]' || format('["{0}"]', inputs.python-version)) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -29,11 +46,13 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: ${{ matrix.python-version }}
 
       - name: Keep Node available for act post steps
         if: ${{ env.ACT == 'true' }}
         run: |
+          apt-get update
+          apt-get install -y nodejs
           node_path="$(command -v node || find / -type f -name node -perm -111 2>/dev/null | head -n 1)"
           if [ -n "$node_path" ]; then
             ln -sf "$node_path" "${pythonLocation}/bin/node"
@@ -45,12 +64,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential ccache
 
+      - name: Select CPython test suite branch
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version }}
+        run: |
+          test_branch="CPython${PYTHON_VERSION//./}"
+          git -C Nuitka-CPython-tests fetch origin "$test_branch"
+          git -C Nuitka-CPython-tests checkout --detach FETCH_HEAD
+
       - name: Show revisions
         env:
           PYTHONPATH: ${{ github.workspace }}/Nuitka
           NUITKA_TEST_INSTALLED: "1"
         run: |
           git submodule status
+          git -C Nuitka-CPython-tests branch --show-current || true
+          git -C Nuitka-CPython-tests rev-parse --short HEAD
           python --version
           python -m nuitka --version
 

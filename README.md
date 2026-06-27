@@ -38,7 +38,16 @@ repo is published on GitHub:
 2. Go to **Actions**.
 3. Select **CPython tests with Nuitka**.
 4. Click **Run workflow**.
-5. Start with `mode=only` and `pattern=test_list.py`.
+5. Use `python-version=all` for the normal run.
+
+The workflow supports Python 3.8 through 3.12. A normal run uses a matrix across
+all of them. Each version checks out the matching `Nuitka-CPython-tests` branch,
+such as `CPython310` for Python 3.10 or `CPython312` for Python 3.12. Older
+branches exist in the tests repo, but they need legacy Python provisioning that
+this workflow does not set up.
+
+For a focused debug run, choose one `python-version`, use `mode=only`, and set a
+small `pattern` such as `test_list.py`.
 
 ## Local Trial With act
 
@@ -47,7 +56,8 @@ The workflow has been tested locally with `act` using:
 ```bash
 act workflow_dispatch \
   -W .github/workflows/cpython-tests.yml \
-  -j cpython310 \
+  -j cpython \
+  --input python-version=3.10 \
   --input mode=only \
   --input pattern=test_list.py \
   --container-architecture linux/amd64 \
