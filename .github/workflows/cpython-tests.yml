@@ -28,6 +28,8 @@ on:
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
+          - "3.14"
 
 jobs:
   cpython:
@@ -37,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ${{ fromJSON(inputs.python-version == 'all' && '["3.8","3.9","3.10","3.11","3.12"]' || format('["{0}"]', inputs.python-version)) }}
+        python-version: ${{ fromJSON(inputs.python-version == 'all' && '["3.8","3.9","3.10","3.11","3.12","3.13","3.14"]' || format('["{0}"]', inputs.python-version)) }}
 
     steps:
       - uses: actions/checkout@v4
