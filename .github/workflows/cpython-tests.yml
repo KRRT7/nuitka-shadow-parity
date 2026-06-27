@@ -68,9 +68,13 @@ jobs:
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
         run: |
-          test_branch="CPython${PYTHON_VERSION//./}"
-          git -C Nuitka-CPython-tests fetch origin "$test_branch"
-          git -C Nuitka-CPython-tests checkout --detach FETCH_HEAD
+          if [ "$PYTHON_VERSION" = "3.12" ]; then
+            git -C Nuitka-CPython-tests checkout --detach
+          else
+            test_branch="CPython${PYTHON_VERSION//./}"
+            git -C Nuitka-CPython-tests fetch origin "$test_branch"
+            git -C Nuitka-CPython-tests checkout --detach FETCH_HEAD
+          fi
 
       - name: Show revisions
         env:
