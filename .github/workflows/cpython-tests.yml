@@ -100,7 +100,7 @@ jobs:
           mv "$extract_dir/test" test
           if [ -d test/decimaltestdata ]; then
             rm -rf decimaltestdata
-            mv test/decimaltestdata decimaltestdata
+            cp -a test/decimaltestdata decimaltestdata
           fi
 
           if ! python update_doctest_generated.py; then
