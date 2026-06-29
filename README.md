@@ -40,11 +40,13 @@ repo is published on GitHub:
 4. Click **Run workflow**.
 5. Use `python-version=all` for the normal run.
 
-The workflow supports Python 3.8 through 3.12. A normal run uses a matrix across
-all of them. Each version checks out the matching `Nuitka-CPython-tests` branch,
-such as `CPython310` for Python 3.10 or `CPython312` for Python 3.12. Older
-branches exist in the tests repo, but they need legacy Python provisioning that
-this workflow does not set up.
+The workflow supports Python 3.8 through 3.14. A normal run uses a matrix across
+all of them. Python 3.8 through 3.12 check out the matching
+`Nuitka-CPython-tests` branch, such as `CPython310` for Python 3.10 or
+`CPython312` for Python 3.12. Python 3.13 and 3.14 reuse the latest Nuitka
+test harness and install the official `Lib/test` sources from the exact CPython
+tag selected by `actions/setup-python`. Older branches exist in the tests repo,
+but they need legacy Python provisioning that this workflow does not set up.
 
 For a focused debug run, choose one `python-version`, use `mode=only`, and set a
 small `pattern` such as `test_list.py`.

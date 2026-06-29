@@ -79,6 +79,32 @@ jobs:
             git -C Nuitka-CPython-tests checkout --detach FETCH_HEAD
           fi
 
+      - name: Install matching CPython test sources
+        if: ${{ matrix.python-version == '3.13' || matrix.python-version == '3.14' }}
+        working-directory: Nuitka-CPython-tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}/Nuitka
+        run: |
+          cpython_tag="$(python -c 'import sys; v = sys.version_info; print(f"v{v.major}.{v.minor}.{v.micro}")')"
+
+          archive="/tmp/cpython-${cpython_tag}.tar.gz"
+          extract_dir="/tmp/cpython-test-${cpython_tag}"
+
+          rm -rf "$archive" "$extract_dir"
+          mkdir -p "$extract_dir"
+
+          curl -fsSL "https://github.com/python/cpython/archive/refs/tags/${cpython_tag}.tar.gz" -o "$archive"
+          tar -xzf "$archive" -C "$extract_dir" --strip-components=2 "cpython-${cpython_tag#v}/Lib/test"
+
+          rm -rf test doctest_generated
+          mv "$extract_dir/test" test
+
+          if ! python update_doctest_generated.py; then
+            echo "::warning::Doctest generation is not compatible with ${cpython_tag}; continuing with official Lib/test sources."
+            rm -rf doctest_generated
+            mkdir doctest_generated
+          fi
+
       - name: Show revisions
         env:
           PYTHONPATH: ${{ github.workspace }}/Nuitka
