@@ -98,6 +98,10 @@ jobs:
 
           rm -rf test doctest_generated
           mv "$extract_dir/test" test
+          if [ -d test/decimaltestdata ]; then
+            rm -rf decimaltestdata
+            mv test/decimaltestdata decimaltestdata
+          fi
 
           if ! python update_doctest_generated.py; then
             echo "::warning::Doctest generation is not compatible with ${cpython_tag}; continuing with official Lib/test sources."
