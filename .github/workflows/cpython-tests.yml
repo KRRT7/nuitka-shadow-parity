@@ -105,6 +105,32 @@ jobs:
             mkdir doctest_generated
           fi
 
+          python - <<'PY'
+          from pathlib import Path
+
+          filename = Path("run_all.py")
+          source = filename.read_text()
+          old = '''\
+    if filename == "test_interpreters.py":
+        reportSkip("No subinterpreter support", dirname, filename)
+        return
+'''
+          new = '''\
+    if filename in (
+        "test_interpreters.py",
+        "test__interpchannels.py",
+        "test__interpreters.py",
+        "test_crossinterp.py",
+    ):
+        reportSkip("No subinterpreter support", dirname, filename)
+        return
+'''
+          if old not in source:
+              raise SystemExit("Could not patch subinterpreter skip list")
+
+          filename.write_text(source.replace(old, new))
+          PY
+
       - name: Show revisions
         env:
           PYTHONPATH: ${{ github.workspace }}/Nuitka
