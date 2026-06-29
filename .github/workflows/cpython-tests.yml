@@ -110,21 +110,21 @@ jobs:
 
           filename = Path("run_all.py")
           source = filename.read_text()
-          old = '''\
-    if filename == "test_interpreters.py":
-        reportSkip("No subinterpreter support", dirname, filename)
-        return
-'''
-          new = '''\
-    if filename in (
-        "test_interpreters.py",
-        "test__interpchannels.py",
-        "test__interpreters.py",
-        "test_crossinterp.py",
-    ):
-        reportSkip("No subinterpreter support", dirname, filename)
-        return
-'''
+          old = (
+              '    if filename == "test_interpreters.py":\n'
+              '        reportSkip("No subinterpreter support", dirname, filename)\n'
+              '        return\n'
+          )
+          new = (
+              '    if filename in (\n'
+              '        "test_interpreters.py",\n'
+              '        "test__interpchannels.py",\n'
+              '        "test__interpreters.py",\n'
+              '        "test_crossinterp.py",\n'
+              '    ):\n'
+              '        reportSkip("No subinterpreter support", dirname, filename)\n'
+              '        return\n'
+          )
           if old not in source:
               raise SystemExit("Could not patch subinterpreter skip list")
 
